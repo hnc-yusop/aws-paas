@@ -1,0 +1,348 @@
+affinity: {}
+clusterController:
+  enabled: false
+  image: 'gcr.io/kubecost1/cluster-controller:v0.0.2'
+  imagePullPolicy: Always
+global:
+  grafana:
+    domainName: cost-analyzer-grafana.default.svc
+    enabled: true
+    proxy: true
+    scheme: http
+  notifications:
+    alertConfigs:
+      alerts:
+        - aggregation: namespace
+          filter: kubecost
+          ownerContact:
+            - owner@example.com
+            - owner2@example.com
+          threshold: 50
+          type: budget
+          window: daily
+        - aggregation: cluster
+          filter: cluster-one
+          threshold: 200.8
+          type: budget
+          window: daily
+        - aggregation: namespace
+          filter: '*'
+          type: recurringUpdate
+          window: weekly
+        - aggregation: namespace
+          filter: kubecost
+          ownerContact:
+            - owner@example.com
+            - owner2@example.com
+          type: recurringUpdate
+          window: weekly
+      enabled: false
+      frontendUrl: 'http://localhost:9090'
+      globalAlertEmails:
+        - recipient@example.com
+        - additionalRecipient@example.com
+      slackWebhookUrl: >-
+        https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+    alertmanager:
+      enabled: false
+      fqdn: 'http://cost-analyzer-prometheus-server.default.svc'
+  podAnnotations: {}
+  prometheus:
+    enabled: true
+    fqdn: 'http://cost-analyzer-prometheus-server.default.svc'
+  thanos:
+    enabled: false
+grafana:
+  grafana.ini:
+    server:
+      root_url: '%(protocol)s://%(domain)s:%(http_port)s/grafana'
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+    datasources:
+      dataSourceName: default-kubecost
+      defaultDatasourceEnabled: false
+      enabled: true
+      label: kubecost_grafana_datasource
+ingress:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  enabled: true
+  hosts:
+    - cost-analyzer.local
+  paths:
+    - /
+  tls: []
+  'hosts[0]': xip.io
+initChownData:
+  resources: {}
+initChownDataImage: busybox
+kubecost:
+  image: gcr.io/kubecost1/server
+  resources:
+    requests:
+      cpu: 100m
+      memory: 55Mi
+kubecostChecks:
+  enabled: true
+  image: quay.io/kubecost1/checks
+  resources:
+    limits:
+      cpu: 100m
+      memory: 200Mi
+    requests:
+      cpu: 20m
+      memory: 100Mi
+kubecostDeployment:
+  replicas: 1
+kubecostFrontend:
+  image: gcr.io/kubecost1/frontend
+  imagePullPolicy: Always
+  resources:
+    requests:
+      cpu: 10m
+      memory: 55Mi
+kubecostModel:
+  etl: true
+  etlStoreDurationDays: 120
+  image: gcr.io/kubecost1/cost-model
+  imagePullPolicy: Always
+  maxQueryConcurrency: 5
+  resources:
+    requests:
+      cpu: 200m
+      memory: 55Mi
+  utcOffset: '+00:00'
+  warmCache: true
+  warmSavingsCache: true
+networkCosts:
+  config:
+    destinations:
+      cross-region: []
+      direct-classification: []
+      in-region: []
+      in-zone:
+        - 127.0.0.1
+        - 169.254.0.0/16
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+  enabled: false
+  image: 'gcr.io/kubecost1/kubecost-network-costs:v13.7'
+  imagePullPolicy: Always
+  podMonitor:
+    additionalLabels: {}
+    enabled: false
+  podSecurityPolicy:
+    enabled: false
+  port: 3001
+  priorityClassName: []
+  resources: {}
+  tolerations: []
+  trafficLogging: true
+networkPolicy:
+  enabled: false
+nodeSelector: {}
+persistentVolume:
+  dbSize: 32.0Gi
+  enabled: true
+  size: 0.2Gi
+podSecurityPolicy:
+  enabled: false
+pricingCsv:
+  enabled: false
+  location:
+    URI: 's3://kc-csv-test/pricing_schema.csv'
+    csvAccessCredentials: pricing-schema-access-secret
+    provider: AWS
+    region: us-east-1
+priority:
+  enabled: false
+prometheus:
+  alertmanager:
+    persistentVolume:
+      enabled: true
+      existingClaim: ''
+      size: 2Gi
+      storageClass: ''
+    enabled: true
+  extraScrapeConfigs: |
+    - job_name: kubecost
+      honor_labels: true
+      scrape_interval: 1m
+      scrape_timeout: 10s
+      metrics_path: /metrics
+      scheme: http
+      dns_sd_configs:
+      - names:
+        - {{ template "cost-analyzer.serviceName" . }}
+        type: 'A'
+        port: 9003
+    - job_name: kubecost-networking
+      kubernetes_sd_configs:
+        - role: pod
+      relabel_configs:
+      # Scrape only the the targets matching the following metadata
+        - source_labels: [__meta_kubernetes_pod_label_app]
+          action: keep
+          regex:  {{ template "cost-analyzer.networkCostsName" . }}
+  nodeExporter:
+    enabled: true
+  pushgateway:
+    enabled: true
+    persistentVolume:
+      enabled: true
+      existingClaim: ''
+      storageClass: ''
+  server:
+    extraArgs:
+      query.max-concurrency: 1
+      query.max-samples: 100000000
+    global:
+      evaluation_interval: 1m
+      external_labels:
+        cluster_id: cluster-one
+      scrape_interval: 1m
+      scrape_timeout: 10s
+    persistentVolume:
+      enabled: true
+      size: 32Gi
+      existingClaim: ''
+      storageClass: ''
+    resources: {}
+    tolerations: []
+    retention: 15d
+  serverFiles:
+    rules:
+      groups:
+        - name: CPU
+          rules:
+            - expr: >-
+                sum(rate(container_cpu_usage_seconds_total{container_name!=""}[5m]))
+              record: 'cluster:cpu_usage:rate5m'
+            - expr: 'rate(container_cpu_usage_seconds_total{container_name!=""}[5m])'
+              record: 'cluster:cpu_usage_nosum:rate5m'
+            - expr: >-
+                avg(irate(container_cpu_usage_seconds_total{container_name!="POD",
+                container_name!=""}[5m])) by (container_name,pod_name,namespace)
+              record: kubecost_container_cpu_usage_irate
+            - expr: >-
+                sum(container_memory_working_set_bytes{container_name!="POD",container_name!=""})
+                by (container_name,pod_name,namespace)
+              record: kubecost_container_memory_working_set_bytes
+            - expr: >-
+                sum(container_memory_working_set_bytes{container_name!="POD",container_name!=""})
+              record: kubecost_cluster_memory_working_set_bytes
+        - name: Savings
+          rules:
+            - expr: >-
+                sum(avg(kube_pod_owner{owner_kind!="DaemonSet"}) by (pod) *
+                sum(container_cpu_allocation) by (pod))
+              labels:
+                daemonset: 'false'
+              record: kubecost_savings_cpu_allocation
+            - expr: >-
+                sum(avg(kube_pod_owner{owner_kind="DaemonSet"}) by (pod) *
+                sum(container_cpu_allocation) by (pod)) / sum(kube_node_info)
+              labels:
+                daemonset: 'true'
+              record: kubecost_savings_cpu_allocation
+            - expr: >-
+                sum(avg(kube_pod_owner{owner_kind!="DaemonSet"}) by (pod) *
+                sum(container_memory_allocation_bytes) by (pod))
+              labels:
+                daemonset: 'false'
+              record: kubecost_savings_memory_allocation_bytes
+            - expr: >-
+                sum(avg(kube_pod_owner{owner_kind="DaemonSet"}) by (pod) *
+                sum(container_memory_allocation_bytes) by (pod)) /
+                sum(kube_node_info)
+              labels:
+                daemonset: 'true'
+              record: kubecost_savings_memory_allocation_bytes
+            - expr: >-
+                label_replace(sum(kube_pod_status_phase{phase="Running",namespace!="kube-system"}
+                > 0) by (pod, namespace), "pod_name", "$1", "pod", "(.+)")
+              record: kubecost_savings_running_pods
+            - expr: >-
+                sum(rate(container_cpu_usage_seconds_total{container_name!="",container_name!="POD",instance!=""}[5m]))
+                by (namespace, pod_name, container_name, instance)
+              record: kubecost_savings_container_cpu_usage_seconds
+            - expr: >-
+                sum(container_memory_working_set_bytes{container_name!="",container_name!="POD",instance!=""})
+                by (namespace, pod_name, container_name, instance)
+              record: kubecost_savings_container_memory_usage_bytes
+            - expr: >-
+                avg(sum(kube_pod_container_resource_requests_cpu_cores{namespace!="kube-system"})
+                by (pod, namespace, instance)) by (pod, namespace)
+              record: kubecost_savings_pod_requests_cpu_cores
+            - expr: >-
+                avg(sum(kube_pod_container_resource_requests_memory_bytes{namespace!="kube-system"})
+                by (pod, namespace, instance)) by (pod, namespace)
+              record: kubecost_savings_pod_requests_memory_bytes
+  kubeStateMetrics:
+    enabled: true
+  prometheus:
+    pushgateway:
+      persistentVolume:
+        size: 2Gi
+  serviceAccounts:
+    nodeExporter:
+      create: true
+prometheusRule:
+  additionalLabels: {}
+  enabled: false
+remoteWrite:
+  postgres:
+    auth:
+      password: admin
+    enabled: false
+    initImage: gcr.io/kubecost1/sql-init
+    initImagePullPolicy: Always
+    installLocal: true
+    persistentVolume:
+      size: 200Gi
+    remotePostgresAddress: ''
+reporting:
+  errorReporting: true
+  logCollection: true
+  productAnalytics: true
+  valuesReporting: true
+saml:
+  appRootURL: 'http://localhost:9090'
+  enabled: false
+  idpMetadataURL: >-
+    https://dev-elu2z98r.auth0.com/samlp/metadata/c6nY4M37rBP0qSO1IYIqBPPyIPxLS8v2
+  rbac:
+    enabled: false
+    groups:
+      - assertionName: 'http://schemas.auth0.com/userType'
+        assertionValues:
+          - admin
+          - superusers
+        enabled: false
+        name: admin
+      - assertionName: 'http://schemas.auth0.com/userType'
+        assertionvalues:
+          - readonly
+        enabled: false
+        name: readonly
+  secretName: kubecost-authzero
+service:
+  annotations: {}
+  labels: {}
+  port: 9090
+  targetPort: 9090
+  type: LoadBalancer
+serviceAccount:
+  annotations: {}
+  create: true
+serviceMonitor:
+  additionalLabels: {}
+  enabled: false
+supportNFS: true
+tolerations: []
+kubecostProductConfigs:
+  clusterName: local
+

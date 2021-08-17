@@ -1,0 +1,9 @@
+service:
+  type: LoadBalancer
+kubecostProductConfigs:
+  clusterName: local
+prometheus:
+  pushgateway:
+    enabled: false
+    persistentVolume:
+      enabled: false
