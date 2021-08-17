@@ -1,0 +1,3 @@
+.terraform*
+iac_okd/cert/*
+terraform.tfstate*

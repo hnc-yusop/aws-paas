@@ -27,7 +27,7 @@ controlPlane:
         iops: 4000
         size: 500
         type: io1
-      type: m5.large
+      type: m5.xlarge
   replicas: 1
 credentialsMode: Manual
 metadata:

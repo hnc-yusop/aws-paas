@@ -2,7 +2,7 @@
 
 # Reference URL : https://velog.io/@_gyullbb/OKD-4.7-%EC%84%A4%EC%B9%98
 
-WORK_DIR=~/workspace
+WORK_DIR=$HOME/workspace
 INSTALL_DIR=$WORK_DIR/install
 
 OKD_INSTALL_PKG_URL=https://github.com/openshift/okd/releases/download/4.7.0-0.okd-2021-08-07-063045/openshift-install-linux-4.7.0-0.okd-2021-08-07-063045.tar.gz
@@ -14,13 +14,14 @@ sudo yum -y install wget
 wget $OKD_INSTALL_PKG_URL
 mkdir -p $INSTALL_DIR
 tar -xvzf openshift-*.tar.gz -C $WORK_DIR
-cd $WORK_DIR
 
 ssh-keygen -t ed25519 -N '' -f ~/.ssh/okd
 echo 'public key:'
 echo '['
 cat ~/.ssh/okd.pub
 echo ']'
+
+cd $WORK_DIR
 
 echo '======= Preparing things ============'
 echo '1) Platform : AWS'
