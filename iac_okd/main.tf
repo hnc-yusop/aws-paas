@@ -91,14 +91,8 @@ resource "aws_instance" "web" {
   # environment it's more common to have a separate private subnet for
   # backend instances.
   subnet_id = aws_subnet.default.id
+}
 
-/*
-  # We run a remote provisioner on the instance after creating it.
-  provisioner "remote-exec" {
-    inline = [
-      "sudo yum -y install golang-bin gcc-c++ libvirt-devel",
-      "sudo yum -y install libvirt libvirt-devel libvirt-daemon-kvm qemu-kvm",
-    ]
-  }
-*/
+output "ssh_connection_command" {
+  value = "ssh -i 'cert/terraform.pem' centos@${aws_instance.web.public_ip}"
 }
