@@ -20,14 +20,19 @@
 - Select your lambda function in drop-down list of the 'Post authentication' & 'Post Confirmation'
 
 * Creating service-account :
-Reference URL -> http://wiki.rockplace.co.kr/display/OP/1.+Authentication#id-1.Authentication-ServiceAccountToken%EC%9D%84%EC%96%BB%EB%8A%94%EB%B0%A9%EB%B2%95
+- Reference URL -> http://wiki.rockplace.co.kr/display/OP/1.+Authentication#id-1.Authentication-ServiceAccountToken%EC%9D%84%EC%96%BB%EB%8A%94%EB%B0%A9%EB%B2%95
 oc create serviceaccount robot
 oc adm policy add-cluster-role-to-user cluster-admin system:serviceaccount:default:robot
 oc describe serviceaccount robot
 oc describe secret robot-token-XXXX
 
-* Disabling the self provisioning
-Reference URL -> https://rcarrata.com/openshift/disabling-self-provisioning-ocp4/
+* Disabling the self provisioning :
+- Reference URL -> https://rcarrata.com/openshift/disabling-self-provisioning-ocp4/
 oc patch clusterrolebinding.rbac self-provisioners -p '{"subjects": null}'
 oc patch clusterrolebinding.rbac self-provisioners -p '{ "metadata": { "annotations": { "rbac.authorization.kubernetes.io/autoupdate": "false" } } }'
 oc get clusterrolebinding.rbac self-provisioners -o yaml
+
+* Removing the kubeadmin user :
+- Reference URL -> https://access.redhat.com/documentation/en-us/openshift_container_platform/4.1/html/authentication/removing-kubeadmin
+oc adm policy add-cluster-role-to-user cluster-admin {USER-ID}
+oc delete secrets kubeadmin -n kube-system
