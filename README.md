@@ -4,7 +4,7 @@
 - Note your access url & kubeadmin password
 2. IAC cognito Step 1
 3. Connect OKD & cognito
-- issuer address with pool id
+- Issuer address with 'pool ID' : https://cognito-idp.ap-northeast-2.amazonaws.com/{pool ID}
 4. install OAuth wrapper 
 5. IAC cognito Step 2
 6. Connect Cognito & OAuth wrapper

@@ -1,3 +1,5 @@
+/******************** Step 1 ****************/
+
 terraform {
   required_providers {
     aws = {
@@ -59,7 +61,8 @@ output "cognito_redirect_uri" {
   value       = "https://${var.user_pool_domain}.auth.ap-northeast-2.amazoncognito.com/oauth2/idpresponse"
 }
 
-/* extra part
+/******************** Step 2 ****************
+
 resource "aws_cognito_user_pool_client" "malangmalang_client" {
   name = "malangmalang-client"
 
@@ -101,4 +104,5 @@ resource "aws_cognito_identity_provider" "malangmalang_provider" {
     preferred_username = "preferred_username"
   }
 }
-*/
+
+********************************************/

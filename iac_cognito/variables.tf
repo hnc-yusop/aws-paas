@@ -1,3 +1,5 @@
+/******************** Step 1 ****************/
+
 variable "user_pool_domain" {
   description = "Amazon Cognito domain : Prefixed domain names can only contain lower-case letters, numbers, and hyphens"
 }
@@ -15,7 +17,8 @@ variable "malangmalang_authorize_scopes" {
   default = "openid read:user user:email"
 }
 
-/* extra part
+/******************** Step 2 ****************
+
 variable "malangmalang_client_id" {
   description = "MalangMalang client ID"
 }
@@ -27,4 +30,5 @@ variable "malangmalang_client_secret" {
 variable "malangmalang_issuer" {
   description = "malangmalang issuer"
 }
-*/
+
+********************************************/
