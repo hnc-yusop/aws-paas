@@ -11,9 +11,19 @@ sudo yum -y install golang-bin gcc-c++ libvirt-devel
 sudo yum -y install libvirt libvirt-devel libvirt-daemon-kvm qemu-kvm
 sudo yum -y install wget 
 
+# Retrieve installer
 wget $OKD_INSTALL_PKG_URL
 mkdir -p $INSTALL_DIR
-tar -xvzf openshift-*.tar.gz -C $WORK_DIR
+tar -xvzf openshift-install*.tar.gz -C $WORK_DIR
+
+# Retrieve client tool
+OKD_CLIENT_INSTALL_PKG_URL=https://github.com/openshift/okd/releases/download/4.7.0-0.okd-2021-08-07-063045/openshift-client-linux-4.7.0-0.okd-2021-08-07-063045.tar.gz
+EXTRACT_TMP_DIR=/tmp/openshift-client
+mkdir $EXTRACT_TMP_DIR
+wget -P $EXTRACT_TMP_DIR $OKD_CLIENT_INSTALL_PKG_URL
+tar -xvzf $EXTRACT_TMP_DIR/openshift-client*.tar.gz -C $EXTRACT_TMP_DIR
+sudo mv $EXTRACT_TMP_DIR/oc /usr/local/bin/
+rm -rf $EXTRACT_TMP_DIR
 
 ssh-keygen -t ed25519 -N '' -f ~/.ssh/okd
 echo 'public key:'
