@@ -22,6 +22,9 @@ exports.handler = (event, context, callback) => {
     // Setup your service account token 
     //var token = '';
     
+    // Setup your OKD base domain
+    //var baseDomain = '';
+    
     // prepare the header
     var headers = {
         'Authorization' : 'Bearer ' + token,
@@ -37,7 +40,7 @@ exports.handler = (event, context, callback) => {
 
     // the post options
     var optionsProject = {
-        host : 'api.okd.okd-newworld.ml',
+        host : 'api.okd.' + baseDomain,
         port : 6443,
         path : '/apis/project.openshift.io/v1/projectrequests',
         method : 'POST',
@@ -77,7 +80,7 @@ exports.handler = (event, context, callback) => {
 
             // the put options
             var optionsRollbinding = {
-                host : 'api.okd.okd-newworld.ml',
+                host : 'api.okd.' + baseDomain,
                 port : 6443,
                 path : '/apis/authorization.openshift.io/v1/namespaces/' + projectName + '/rolebindings/admin',
                 method : 'PUT',
