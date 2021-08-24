@@ -9,27 +9,30 @@
 5. IAC cognito Step 2
 6. Connect Cognito & OAuth wrapper
 
-- Access to AWS Lambda console
-- Click "Create function" button
-- Select "Author from scratch"
-* Enter Function name
-* Runtime : Node.js 14.x
-* Click "Create function" button
-- Copy your Lambda function code and then paste the code into 'index.js' 
-(You need to activate some of variables - token and baseDomain )
-- File > Save & Deploy
-- Access to AWS Cognito console
-- Manage User Pools > Select your pool > Select 'General settings > Triggers'
-- Select your lambda function in drop-down list of the 'Post authentication' & 'Post Confirmation'
-
 ## Creating service-account :
 - Reference URL -> http://wiki.rockplace.co.kr/display/OP/1.+Authentication#id-1.Authentication-ServiceAccountToken%EC%9D%84%EC%96%BB%EB%8A%94%EB%B0%A9%EB%B2%95
 ```
 oc create serviceaccount robot
 oc adm policy add-cluster-role-to-user cluster-admin system:serviceaccount:default:robot
 oc describe serviceaccount robot
-oc describe secret robot-token-XXXX
+oc describe secret robot-token-XXXX // Note your token for the serviceaccount
 ```
+
+## Constructing an AWS Lambda function
++ Access to AWS Lambda console
++ Click "Create function" button
++ Select "Author from scratch"
+	+ Enter Function name
+	+ Runtime : Node.js 14.x
+	+ Click "Create function" button
++ Copy your Lambda function code and then paste the code into 'index.js' 
+	+ You need to activate some of variables - token and baseDomain
+	+ The token value is a service-account's token for the OKD
+	+ The baseDomain value is a base domain name for the OKD
++ File > Save & Deploy
++ Access to AWS Cognito console
++ Manage User Pools > Select your pool > Select 'General settings > Triggers'
++ Select your lambda function in drop-down list of the 'Post authentication' & 'Post Confirmation'
 
 ## Disabling the self provisioning :
 - Reference URL -> https://rcarrata.com/openshift/disabling-self-provisioning-ocp4/
