@@ -15,7 +15,7 @@
 * Enter Function name
 * Runtime : Node.js 14.x
 * Click "Create function" button
-- Copy your Lambda function code and then paste the code into 'index.js'
+- Copy your Lambda function code and then paste the code into 'index.js' (You need to activat some of variables - token and baseDomain )
 - File > Save & Deploy
 - Access to AWS Cognito console
 - Manage User Pools > Select your pool > Select 'General settings > Triggers'
