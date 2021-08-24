@@ -25,7 +25,7 @@ oc describe secret robot-token-XXXX // Note your token for the serviceaccount
 	+ Enter Function name
 	+ Runtime : Node.js 14.x
 	+ Click "Create function" button
-+ Copy your Lambda function code and then paste the code into 'index.js' 
++ Copy your Lambda function code (lambda/index.js) and then paste the code into 'index.js' 
 	+ You need to activate some of variables - token and baseDomain
 	+ The token value is a service-account's token for the OKD
 	+ The baseDomain value is a base domain name for the OKD
