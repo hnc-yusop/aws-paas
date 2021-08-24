@@ -11,10 +11,10 @@
 
 - Access to AWS Lambda console
 - Click "Create function" button
-- Select "Author from scratch" 
-++ Enter Function name
-++ Runtime : Node.js 14.x
-++ Click "Create function" button
+- Select "Author from scratch"
+* Enter Function name
+* Runtime : Node.js 14.x
+* Click "Create function" button
 - Copy your Lambda function code and then paste the code into 'index.js'
 - File > Save & Deploy
 - Access to AWS Cognito console
