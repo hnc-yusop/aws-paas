@@ -1,5 +1,7 @@
 # PaaS Service using OKD on AWS
 
+![Architecture](./architecture.svg)
+
 1. Install OKD
 - Note your access url & kubeadmin password
 2. IAC cognito Step 1
